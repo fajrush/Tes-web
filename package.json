@@ -1,0 +1,12 @@
+{
+  "name": "pembayaran-otomatis-wa",
+  "version": "1.0.0",
+  "description": "Website pembayaran otomatis terintegrasi WhatsApp",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node api/index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
