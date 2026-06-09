@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Pengaturan Pembayaran</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        h2 {
+            margin-top: 0;
+            color: #111;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        input[type="text"], input[type="password"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .toggle-group input {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+        button {
+            background-color: #0070f3;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #0060df;
+        }
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+            text-align: center;
+        }
+        .success { background-color: #d4edda; color: #155724; display: block; }
+        .error { background-color: #f8d7da; color: #721c24; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>⚙️ Admin Panel Payment</h2>
+    
+    <div class="form-group">
+        <label for="admin_password">Password Admin Panel:</label>
+        <input type="password" id="admin_password" placeholder="Masukkan password verifikasi ke server">
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid #f0f0f0; margin: 25px 0;">
+
+    <h3>1. Midtrans Gateway</h3>
+    <div class="toggle-group">
+        <input type="checkbox" id="midtrans_active">
+        <label for="midtrans_active">Aktifkan Midtrans</label>
+    </div>
+    <div class="form-group">
+        <label for="midtrans_key">Server Key Midtrans:</label>
+        <input type="text" id="midtrans_key" placeholder="SB-Mid-Server-xxxx">
+    </div>
+
+    <h3>2. Transfer Manual (BCA)</h3>
+    <div class="toggle-group">
+        <input type="checkbox" id="bca_active">
+        <label for="bca_active">Aktifkan Transfer Manual BCA</label>
+    </div>
+    <div class="form-group">
+        <label for="bca_norek">Nomor Rekening BCA:</label>
+        <input type="text" id="bca_norek" placeholder="1234567890">
+    </div>
+    <div class="form-group">
+        <label for="bca_an">Atas Nama (A/N):</label>
+        <input type="text" id="bca_an" placeholder="Nama Pemilik Rekening">
+    </div>
+
+    <button onclick="simpanPengaturan()">Simpan Semua Setelan</button>
+    
+    <div id="status_msg" class="status"></div>
+</div>
+
+<script>
+    async function simpanPengaturan() {
+        const msgDiv = document.getElementById('status_msg');
+        msgDiv.className = 'status';
+        msgDiv.style.display = 'none';
+
+        const data = {
+            password: document.getElementById('admin_password').value,
+            settings: {
+                midtrans: {
+                    active: document.getElementById('midtrans_active').checked,
+                    server_key: document.getElementById('midtrans_key').value
+                },
+                bca: {
+                    active: document.getElementById('bca_active').checked,
+                    norek: document.getElementById('bca_norek').value,
+                    an: document.getElementById('bca_an').value
+                }
+            }
+        };
+
+        try {
+            const res = await fetch('/api/admin/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            
+            if (result.status === 'success') {
+                msgDiv.innerText = '✅ Pengaturan berhasil disimpan!';
+                msgDiv.classList.add('success');
+            } else {
+                msgDiv.innerText = '❌ Gagal: ' + result.message;
+                msgDiv.classList.add('error');
+            }
+        } catch (err) {
+            msgDiv.innerText = '❌ Gagal terhubung ke server';
+            msgDiv.classList.add('error');
+        }
+    }
+</script>
+</body>
+</html>
